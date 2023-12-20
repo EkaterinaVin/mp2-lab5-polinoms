@@ -12,7 +12,7 @@ protected:
 	TNode<T>* pPrevious; // звено перед текущим
 	TNode<T>* pLast; // последнее звено
 	TNode<T>* pStop; // значение указателя, означающего конец списка
-	int length; // количество звеньев в списке
+	int length=0; // количество звеньев в списке
 
 public:
 
@@ -37,54 +37,134 @@ public:
 
 	T GetCurrentItem();
 	void SetCurrentItem(T item) { pCurrent->value = item; }
+	void InsertPrevCurrent(T item);
+	void InsertNextCurrent(T item);
 
 
 };
 template <class T>
 TList<T>::TList()
 {
+	pFirst = nullptr;
+    pCurrent= nullptr; // текущее звено
+	pPrevious= nullptr; // звено перед текущим
+	pLast= nullptr; // последнее звено
+	pStop=nullptr; // значение указателя, означающего конец списка
+	length=0;
 
 }
 
 template <class T>
 TList<T>::~TList()
 {
+	TNode<T>* p;
+	while (pFirst != nullptr) {
+		p = pFirst;
+		pFirst = pFirst->pNext;
+		delete p;
+	}
 
 }
 
 template <class T>
 bool TList<T>::IsEmpty()
 {
-	return false;
+	if (length == 0)
+		return true;
+	else
+		return false;
 }
 
 template <class T>
 void TList<T>::InsertFirst(T item)
 {
+	TNode<T>* node = new TNode<T>;
+	node->value = item;
+	node->pNext = pFirst;
+	pFirst = node;
+	if (IsEmpty())
+	{
+		pLast = pFirst;
+		pStop = new TNode<T>;
+		pFirst->pNext = pStop;
+		pStop->pNext = nullptr;
+	}
+
 
 }
 
 template <class T>
-void TList<T>::InsertLast(T item)
+void TList<T>::InsertLast(T item)//проверь ошибка скорее всего тут
 {
+	TNode<T>* node = new TNode<T>;
+	node->value = item;
+	pPrevious=pLast;
+	pLast = node;
+	pPrevious->pNext = pLast;
+	if (IsEmpty())
+	{
+		pLast = pFirst;
+		pStop = new TNode<T>;
+		pStop->pNext = nullptr;
+	}
+	else
+		pLast->pNext = pStop;
+	length++;
 
 }
 
 template <class T>
 void TList<T>::InsertCurrent(T item)
 {
+	TNode<T>* node = new TNode<T>;
+	node->value = item;
+
+	if (pCurrent == pFirst) {
+		node->pNext = pFirst;
+		pFirst = node;
+	}
+	else {
+		pPrevious->pNext = node;
+		node->pNext = pCurrent;
+	}
+	length++;
 	
 }
 
 template <class T>
-void TList<T>::DeleteFirst()
+void TList<T>::DeleteFirst()//не уверена
 {
+	if (IsEmpty() == false) {
+		pFirst = pFirst->pNext;
+		length--;
+		if (length == 0) {
+			pLast = nullptr;
+			pStop = nullptr;
+		}
+
+	}
+	else
+		throw("List is empty");
 
 }
 
 template <class T>
 void TList<T>::DeleteCurrent()
 {
+	if (pCurrent == pFirst)
+	{
+		DeleteFirst();//сомнительно
+	}
+	else
+	{
+		pPrevious->pNext = pCurrent->pNext;
+		pCurrent = pCurrent->pNext;
+		length--;
+	}
+	if (pCurrent == pLast) {
+		pLast = pPrevious;
+		length--;
+	}
 	
 }
 
@@ -93,26 +173,65 @@ T TList<T>::GetCurrentItem()
 {
 	if (pCurrent == pStop)
 		throw " ";
+	if (pCurrent == nullptr) 
+		throw " ";
 	return pCurrent->value;
 }
 
 template <class T>
-void TList<T>::Reset()
+void TList<T>::Reset()//такой ли функционал
 {
-
+	pCurrent = pFirst;
+	pPrevious = nullptr;
 }
 
 template <class T>
 void TList<T>::GoNext()
 {
-
+	pPrevious = pCurrent;
+	pCurrent = pCurrent->pNext;
 }
 
 template <class T>
 bool TList<T>::IsEnd()
 {
+	if (pCurrent->pNext == pStop)
+		return true;
 	return false;
 }
+template <class T>
+void TList<T>::InsertPrevCurrent(T item)//добавить до текущего
+{
+	TNode<T>* node = new TNode<T>;
+	node->value = item;
+
+	if (pCurrent == pFirst) {
+		node->pNext = pFirst;
+		pFirst = node;
+	}
+	else {
+		pPrevious->pNext = node;
+		node->pNext = pCurrent;
+	}
+	length++;
+}
+template <class T>
+void TList<T>::InsertNextCurrent(T item)
+{
+	TNode<T>* newNode = new TNode<T>;
+	newNode->value = item;
+	if (pCurrent == pLast) {
+		newNode->pNext = nullptr;
+		pLast->pNext = newNode;
+		pLast = newNode;
+	}
+	else {
+		newNode->pNext = pCurrent->pNext;
+		pCurrent->pNext = newNode;
+	}
+	length++;
+}
+
 
 
 
